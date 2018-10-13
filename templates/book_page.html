@@ -1,0 +1,42 @@
+{% extends "template.html" %}
+
+{% block heading %}
+
+
+
+<form action="{{url_for('search')}}" method="post">
+    <input type="text" name="search" placeholder="Search...">
+    <button>Search</button>
+</form>
+<br>
+
+
+    
+          
+            <li>Title: {{row[2][2:-1]}}</li>
+            <li>Author: {{row[3][2:-1]}}</li>
+            <li>Published: {{row[4][2:-2]}}</li>
+            <li>ISBN: {{row[1][2:-1]}}</li>
+            <li>Your rating: {{rating}}<!-- your specific rating from just your db entry -->
+            <li>Overall rating: {{avg_rating}}
+            <br>
+
+            <!-- Other people's reviews from API and/or db (db to start with)-->
+            <form action="{{url_for('rate')}}" id="review_form" method="post">
+                <input type="radio" name="usr_rating" value="1">
+                <input type="radio" name="usr_rating" value="2" checked>
+                <input type="radio" name="usr_rating" value="3">
+                <textarea name="texty" form="review_form" style="resize: none;" rows="4" cols="50">{{review}}</textarea>              
+            <input type="submit">
+
+
+
+<br><button><a href="{{ url_for('index') }}">Log Out</a></button>
+
+{% endblock %}
+
+{% block body %}
+ 
+
+
+{% endblock %}

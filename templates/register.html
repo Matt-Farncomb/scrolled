@@ -1,0 +1,42 @@
+{% extends "template.html" %}
+
+{% block heading %}
+    {{msg}}
+{% endblock %}
+
+{% block body %}
+    <p>
+        At Scrolled we are at Scrolled
+    </p>
+    {% if registered == False %}
+            
+     <form action="{{ url_for('register') }}" method="post">
+     	<input type="text" name="email" placeholder="Email...">
+        <br>
+        <input type="text" name="password" placeholder="Password...">
+        <br>
+        <input type="text" name="first_name" placeholder="First Name...">
+        <br>
+        <input type="text" name="last_name" placeholder="Last Name...">
+        <br>
+        <input type="text" name="dob" placeholder="Birthday MM/DD/YY...">
+        <br>
+         <input type="text" name="country" placeholder="Country...">
+        <br>
+        <br> 
+        <button>Register</button>
+        <br><br>   
+    </form>
+            
+    {% endif %}
+
+    <ul>
+        {% for detail in details %}
+            <li><h2>{{ detail }}</h2></li>
+        {% endfor %}
+    </ul>
+
+
+
+    <a href="{{ url_for(url) }}">Home</a>
+{% endblock %}

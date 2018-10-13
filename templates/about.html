@@ -1,0 +1,32 @@
+{% extends "template.html" %}
+
+{% block heading %}
+    What do you like?
+{% endblock %}
+
+{% block body %}
+    <p>
+        At Scrolled we are at Scrolled
+    </p>
+
+     <form action="{{ url_for('about') }}" method="post">
+        <br>
+        <input type="text" name="author" placeholder="Favourite Author...">
+        <br>
+        <input type="text" name="book" placeholder="Favourite Book...">
+        <br>
+        <br> 
+        <button>Update</button>
+        <br><br>   
+    </form>
+
+    <!-- <ul>
+        {% for detail in details %}
+            <li><h2>{{ detail }}</h2></li>
+        {% endfor %}
+    </ul> -->
+
+
+
+    <a href="{{ url_for('home') }}">Home</a>
+{% endblock %}

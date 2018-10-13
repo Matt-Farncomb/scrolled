@@ -1,0 +1,39 @@
+{% extends "template.html" %}
+
+{% block heading %}
+
+
+
+<form action="{{url_for('search')}}" method="post">
+    <input type="text" name="search" placeholder="Search...">
+    <button>Search</button>
+</form>
+<br>
+
+    {% for row in rows %}
+            <!-- takes row into next page and displays row's info only on next page -->
+            
+        <form action="{{ url_for('get_book') }}" method="post">
+            <li><button type="submit" name="clicked" value="{{row}}">{{row.book_name}}.Author: {{row.author}}, Published: {{row.year}}</button></li>
+        </form>
+            
+ <!--            <li>Author: {{row.author}}</li>
+ <li>Published: {{row.year}}</li>
+ <li>ISBN: {{row.isbn}}</li> -->
+    {% endfor %}
+   <!--  {% for review in reviews %}
+           <li>Your rating: {{review.rating}}your specific rating from just your db entry
+           <li>Overall rating: {{avg}}avg rating of all users for book
+           <br>
+   {% endfor %} -->
+
+
+<br><button><a href="{{ url_for('index') }}">Log Out</a></button>
+
+{% endblock %}
+
+{% block body %}
+ 
+
+
+{% endblock %}
