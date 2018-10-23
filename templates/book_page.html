@@ -26,8 +26,21 @@
                 <input type="radio" name="usr_rating" value="1">
                 <input type="radio" name="usr_rating" value="2" checked>
                 <input type="radio" name="usr_rating" value="3">
-                <textarea name="texty" form="review_form" style="resize: none;" rows="4" cols="50">{{review}}</textarea>              
+                <br>
+                <textarea name="texty" form="review_form" style="resize: none;" rows="4" cols="50">{{review}}</textarea>
+            <br>    
             <input type="submit">
+            <br> 
+            <br> 
+            
+            {% for rev in reviews %}
+                {% if rev.review != "Not yet reviewed" %}
+                <br>
+                {{rev.first_name}} says...
+                <br>
+                <textarea disabled style="resize: none;" rows="4" cols="50">{{rev.review}}</textarea>
+                {% endif %}
+            {% endfor %}
 
 
 

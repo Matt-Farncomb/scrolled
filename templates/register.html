@@ -6,35 +6,54 @@
 
 {% block body %}
     <p>
-        At Scrolled we are at Scrolled
+        {{msg_2}}
     </p>
     {% if registered == False %}
             
-     <form action="{{ url_for('register') }}" method="post">
-     	<input type="text" name="email" placeholder="Email...">
+   <form action="{{ url_for('register') }}" method="post">
+       <input type="text" name="email" placeholder="Email..." style="{{color.email}}" value={{details.email}} >
+      <br>
+      <input type="text" name="password" placeholder="Password..." style="{{color.password}}" value={{details.password}}>
+      <br>
+      <input type="text" name="first_name" placeholder="First Name..." style="{{color.first_name}}" value={{details.first_name}}> 
+      <br>
+      <input type="text" name="last_name" placeholder="Last Name..." style="{{color.last_name}}" value={{details.last_name}}> 
+      <br>
+     <input type="date" name="dob" placeholder="Birthday MM/DD/YY..." style="{{color.dob}}" value={{details.dob}}>
+      
+      <br>
+       <input type="text" name="country" placeholder="Country..." style="{{color.country}}" value={{details.country}}> 
+      <br>
+      <br> 
+      <button>Register</button>
+      <br><br>   
+    </form>
+
+     <!-- <form action="{{ url_for('register') }}" method="post">
+        <input type="text" name="email" placeholder="{{details.email}}">
         <br>
-        <input type="text" name="password" placeholder="Password...">
+        <input type="text" name="password" placeholder="{{details.password}}">
         <br>
-        <input type="text" name="first_name" placeholder="First Name...">
+        <input type="text" name="first_name" placeholder="{{details.first_name}}">
         <br>
-        <input type="text" name="last_name" placeholder="Last Name...">
+        <input type="text" name="last_name" placeholder="{{details.last_name}}">
         <br>
-        <input type="text" name="dob" placeholder="Birthday MM/DD/YY...">
+        <input type="text" name="dob" placeholder="{{details.dob}}">
         <br>
-         <input type="text" name="country" placeholder="Country...">
+         <input type="text" name="country" placeholder="{{details.country}}">
         <br>
         <br> 
         <button>Register</button>
         <br><br>   
-    </form>
+         </form> -->
             
     {% endif %}
 
-    <ul>
+    <!-- <ul>
         {% for detail in details %}
             <li><h2>{{ detail }}</h2></li>
         {% endfor %}
-    </ul>
+    </ul> -->
 
 
 

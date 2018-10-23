@@ -8,6 +8,18 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from sqlalchemy import exc
 
+
+#TODO:
+# Redo all tables, restarting all data so they all begin at the same int (can just delete main ids)
+		#this will enable the request in home to work correctly
+# If testing success, do the API stuff
+# Quick Sass overview (lecture n stuff)
+# Quick Boostrap overview
+# USe Sass and Boostrap to style page
+
+
+
+
 app = Flask(__name__)
 
 # Check for environment variable
@@ -37,10 +49,25 @@ fail = "LogIn failed. Password or Email not recognised."
 
 #retrieves form data according to variables in request_list and stores them in return_list
 def get_form_data(request_list):
-		return_list = []
-		for e in request_list:
-			return_list.append(request.form.get(e))
-		return return_list
+	reg_success = True
+	return_list = []
+	reg_dict = {}
+	color_dict = {}
+	for e in request_list:
+		temp = request.form.get(e)
+		if temp == "":
+			reg_dict[e] = ""
+			color_dict[e] = 'background-color:#ffd0c4'
+			if reg_success == True:
+				reg_success = False
+		else:
+			reg_dict[e] = temp
+			return_list.append(temp)
+	if reg_success == False:
+		return_list = False
+	session["temp_reg"] = reg_dict
+	session["colors"] = color_dict
+	return return_list
 
 @app.route("/", methods=["GET"])
 def index():
@@ -73,34 +100,50 @@ def register():
 	msg = "Join the Scrolled clan"
 	registered = False
 	url = 'index'
+	msg_2 = "At Scrolled we are scrolled"
+	details = ""
+	colors = ""
+
 	if request.method == "POST":
 		return_list = get_form_data(request_list)
-		
-		# username = request.form.get("username")
-		db.execute("INSERT INTO user_logins (password, email) VALUES (:password, :email)",
-							{"password":return_list[0], "email": return_list[1]})
-		db.execute('''INSERT INTO user_details (first_name, last_name, dob, country) 
-					  VALUES (:first_name, :last_name, :dob, :country)''',
-							{"first_name":return_list[2], "last_name": return_list[3],
-					 	    "dob": int(return_list[4]),"country": return_list[5]})
-		# db.execute("INSERT INTO user_likes (author, book) VALUES (:author, :book)",
-		# 					{"author":return_list[6], "book": return_list[7]})
-		#if dob != None:
-		db.commit()
-		msg = "Registration Successful"
-		registered = True
-		url = 'home'
-			# retrieved_id = db.execute("SELECT user_id FROM user_logins WHERE email = :email",
-			# 	{"email": return_list[1]}).fetchone()
-			# db.execute('''INSERT INTO user_details (user_id) 
-			# 	VALUES (:user_id)'''), {"user_id":retrieved_id }
-			# db.commit()
-		# except exc.SQLAlchemyError:
-		# 	msg = "Email already registered... "
-		# 	registered = False
-	return render_template("register.html", msg=msg, registered=registered, url=url)
+		if return_list == False:
+			msg_2 = "Please enter in all details requested"
+			details = session["temp_reg"]
+			colors = session["colors"]
+			session["temp_reg"] = ""
+			session["colors"] = ""
 
-	
+		else:
+			# username = request.form.get("username")
+			db.execute("INSERT INTO user_logins (password, email) VALUES (:password, :email)",
+								{"password":return_list[0], "email": return_list[1]})
+			db.execute('''INSERT INTO user_details (first_name, last_name, dob, country) 
+						  VALUES (:first_name, :last_name, :dob, :country)''',
+								{"first_name":return_list[2], "last_name": return_list[3],
+						 	    "dob": return_list[4],"country": return_list[5]})
+			# db.execute("INSERT INTO user_likes (author, book) VALUES (:author, :book)",
+			# 					{"author":return_list[6], "book": return_list[7]})
+			#if dob != None:
+			db.commit()
+			user_id = db.execute("SELECT user_id FROM user_logins WHERE email = :email",
+				{"email": return_list[1]}).fetchone()
+			
+			session["user_id"] = user_id.user_id
+
+			msg = "Registration Successful"
+			registered = True
+			url = 'home'
+				# retrieved_id = db.execute("SELECT user_id FROM user_logins WHERE email = :email",
+				# 	{"email": return_list[1]}).fetchone()
+				# db.execute('''INSERT INTO user_details (user_id) 
+				# 	VALUES (:user_id)'''), {"user_id":retrieved_id }
+				# db.commit()
+			# except exc.SQLAlchemyError:
+			# 	msg = "Email already registered... "
+			# 	registered = False
+	return render_template("register.html", msg=msg, msg_2=msg_2, registered=registered, url=url, details=details, color=colors)
+
+			
 
 @app.route("/home", methods=["GET"])
 def home():
@@ -122,7 +165,7 @@ def about():
 	
 @app.route("/about", methods=["POST"])
 def update_about():
-	get_form_data(request_list)
+	return_list = get_form_data(request_list)
 	db.execute("INSERT INTO user_likes (author, book, user_id) VALUES (:author, :book, :user_id)",
 							{"author":return_list[6], "book": return_list[7], "user_id":session["user_id"]})
 	db.commit()
@@ -153,7 +196,8 @@ def search():
 	counter = 0
 	try:
 		entry = request.form.get("search")
-		rows = db.execute("SELECT * FROM books WHERE book_name = :search or author =:search",
+		entry = "%" + entry + "%"
+		rows = db.execute("SELECT * FROM books WHERE book_name LIKE :search or author LIKE :search or ISBN LIKE :search",
 			{"search":entry}).fetchall()
 
 		book_id = rows[0]["book_id"]
@@ -181,9 +225,14 @@ def get_book():
 	review = "Not yet reviewed"
 	avg_ints = []
 
-	reviews = db.execute('''SELECT * FROM reviews 
-		WHERE book_id = :book_id''', 
-		{"book_id":book_id}).fetchall()
+	# reviews = db.execute('''SELECT * FROM reviews 
+	# 	WHERE book_id = :book_id''', 
+	# 	{"book_id":book_id}).fetchall()
+
+	reviews = db.execute("""SELECT * FROM user_details JOIN reviews
+				ON reviews.reviewer_id = user_details.details_id
+				WHERE book_id = :book_id """, {"book_id":book_id}).fetchall()
+	#rev_name = rev_name
 
 	avg_rating = db.execute('''SELECT AVG(rating) FROM reviews 
 		WHERE book_id = :book_id''', {"book_id":book_id}).fetchone()
@@ -193,118 +242,43 @@ def get_book():
 			rating = e.rating
 			review = e.review
 
-	# for x in avg_rating:
-	# 	for e in x:
-	# 		avg_ints.append(float("{0:.2f}".format(e)))
+	#session["clicked"] = [row, rating, review, book_id]
 
-	session["clicked"] = [row, rating, review, book_id]
+	session["clicked"] = { "row": row,
+						   "rating": rating,
+						   "review": review,
+						   "reviews": reviews,
+						   "book_id": book_id }
+
 	if avg_rating[0] != None:
 		avg_rating = "{0:.2f}".format(avg_rating[0])
 	else:
 		avg_rating = "Not yet rated"
 
 
-	return render_template("book_page.html", row=session["clicked"][0], 
-		rating=session["clicked"][1], avg_rating=avg_rating,
-		review=session["clicked"][2])
+	return render_template("book_page.html", row=session["clicked"]["row"], 
+		rating=session["clicked"]["rating"], avg_rating=avg_rating,
+		review=session["clicked"]["review"], reviews=session["clicked"]["reviews"])
 
-# might need to use that weird variable URL string that changes according to input that's on cs50 vid
-# @app.route("/book_page", methods=["GET", "POST"])
-# def book_page():
-	
-	# review = "You haven't reviewed this yet."
-	# rating = "Not yet rated"
-	# avg_rating = "Not yet rated"
-	# counter = 0
-	
-	
-	
-	# # only change value if clicked, else see 'except'
-	# row = request.form.get('clicked')
-	# if row != None:
-	# 	row = row.split(",")
-	# 	session["clicked"] = row
-	# 	book_id = row[0][1:]
-	# else:
-	# 	print("not clicked")
-	# 	book_id = session["clicked"][3]
-	# 	row = session["clicked"][0]
-	# avg_rating = 0
 
-	# print("working")
-	# # reviews = db.execute('''SELECT rating, review FROM reviews 
-	# # 	WHERE book_id = :book_id  and reviewer_id = :reviewer_id''', 
-	# # 	{"book_id":book_id, "reviewer_id":session["user_id"]}).fetchone()
-	# reviews = db.execute('''SELECT * FROM reviews 
-	# 	WHERE book_id = :book_id''', 
-	# 	{"book_id":book_id}).fetchall()
-
-	# for e in reviews:
-	# 	if e.reviewer_id == session["user_id"]:
-	# 		rating = e.rating
-	# 		review = e.review
-
-	# if reviews == None:
-	# 	pass
-	# else:
-	# 	for e in reviews:
-	# 		avg_rating += int(e["rating"])
-	# 		counter += 1
-	# if avg_rating > 0:
-	# 	avg_rating = avg_rating / counter
-	# 	avg_rating = "{0:.2f}".format(avg_rating)
-	# else:
-	# 	avg_rating = "Not rated"
-	
-	# # session["clicked"] = [row, reviews]
-	# session["clicked"] = [row, rating, review, book_id]
-
-	# # if not clicked on, then the radio form must have been submitted
-	# #rate()
-		
-	
-	
-
-	# #id_for_reviews = row[0] # This is a test for how to access reviews when needed
-	# #print("row: ", row)
-	# # return render_template("book_page.html", row=session["clicked"][0], rating=reviews.rating, review=reviews.review)
-	# return render_template("book_page.html", row=session["clicked"][0], 
-	# 	rating=session["clicked"][1], avg_rating=avg_rating,
-	# 	review=session["clicked"][2])
 
 @app.route("/book_page", methods=["POST"])
 def rate():
-	# only do the following if form submitted, not simple page reload
+
 	if request.method == "POST":
-		#try:
-		print("This part")
+
 		rating = int(request.form.get("usr_rating"))
 		review = request.form.get("texty")
-		print("rating: ", rating)
-		print("review: ", review)
-		book_id = int(session["clicked"][0][0][1:])
+		book_id = int(session["clicked"]["book_id"])
 
-		# Delete old review and replace with new one. Deletes old review and rating.
-		#TODO: Prabably should make 'submit review' a sperate form so user can submit one without effectng the other
 		db.execute("DELETE FROM reviews WHERE book_id = :book_id and reviewer_id = :reviewer_id", {"book_id":book_id, "reviewer_id":session["user_id"]})
 		db.execute("INSERT INTO reviews (book_id, rating, review, reviewer_id) VALUES (:book_id, :rating, :review, :reviewer_id)", 
 			{"book_id":book_id, "rating":rating, "review": review, "reviewer_id":session["user_id"]})
 		db.commit()
 		avg_rating = db.execute("SELECT AVG(rating) FROM reviews WHERE book_id = :book_id", {"book_id":book_id}).fetchone()
 		avg_rating = "{0:.2f}".format(avg_rating[0])
-		#except Exception:
-			#print("error")
-		return render_template("book_page.html", row=session["clicked"][0], 
-		rating=rating, avg_rating=avg_rating,
+
+		return render_template("book_page.html", row=session["clicked"]["row"], 
+		rating=rating, avg_rating=avg_rating, reviews=session["clicked"]["reviews"],
 		review=review)
 			
-
-# TODO:
-# 1: add new table:
-		#reviews_table
-		#review_id, book_id, rating, review
-# 2: new book page:
-		#page that displays info about book:
-		# - shows same info as before but one page
-
-# 3: look into api stuff
