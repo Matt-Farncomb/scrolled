@@ -278,7 +278,11 @@ def rate():
 		avg_rating = db.execute("SELECT AVG(rating) FROM reviews WHERE book_id = :book_id", {"book_id":book_id}).fetchone()
 		avg_rating = "{0:.2f}".format(avg_rating[0])
 
+		reviews = db.execute("""SELECT * FROM user_details JOIN reviews
+				ON reviews.reviewer_id = user_details.details_id
+				WHERE book_id = :book_id """, {"book_id":book_id}).fetchall()
+
 		return render_template("book_page.html", row=session["clicked"]["row"], 
-		rating=rating, avg_rating=avg_rating, reviews=session["clicked"]["reviews"],
+		rating=rating, avg_rating=avg_rating, reviews=reviews,
 		review=review)
 			
