@@ -17,6 +17,8 @@ from sqlalchemy import exc
 # Quick Boostrap overview
 # USe Sass and Boostrap to style page
 
+##TODO: Have the home link in template.html be inherited by all pages 
+
 
 
 
@@ -223,6 +225,7 @@ def get_book():
 	book_id = row[0][1:]
 	rating = "Not yet rated"
 	review = "Not yet reviewed"
+	already_reviewed = False
 	avg_ints = []
 
 	# reviews = db.execute('''SELECT * FROM reviews 
@@ -241,6 +244,7 @@ def get_book():
 		if e.reviewer_id == session["user_id"]:
 			rating = e.rating
 			review = e.review
+			already_reviewed = True
 
 	#session["clicked"] = [row, rating, review, book_id]
 
@@ -248,7 +252,8 @@ def get_book():
 						   "rating": rating,
 						   "review": review,
 						   "reviews": reviews,
-						   "book_id": book_id }
+						   "book_id": book_id,
+						   "already_reviewed":True }
 
 	if avg_rating[0] != None:
 		avg_rating = "{0:.2f}".format(avg_rating[0])
@@ -258,7 +263,8 @@ def get_book():
 
 	return render_template("book_page.html", row=session["clicked"]["row"], 
 		rating=session["clicked"]["rating"], avg_rating=avg_rating,
-		review=session["clicked"]["review"], reviews=session["clicked"]["reviews"])
+		review=session["clicked"]["review"], reviews=session["clicked"]["reviews"],
+		already_reviewed=already_reviewed)
 
 
 
@@ -284,5 +290,5 @@ def rate():
 
 		return render_template("book_page.html", row=session["clicked"]["row"], 
 		rating=rating, avg_rating=avg_rating, reviews=reviews,
-		review=review)
+		review=review, already_reviewed=session["clicked"]["already_reviewed"])
 			

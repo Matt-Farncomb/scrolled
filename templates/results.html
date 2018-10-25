@@ -9,10 +9,13 @@
     <button>Search</button>
 </form>
 <br>
+    {% if rows|length < 1 %}
+        No results found :(
+    {% endif %}
 
     {% for row in rows %}
             <!-- takes row into next page and displays row's info only on next page -->
-            
+        
         <form action="{{ url_for('get_book') }}" method="post">
             <li><button type="submit" name="clicked" value="{{row}}">{{row.book_name}}.Author: {{row.author}}, Published: {{row.year}}</button></li>
         </form>

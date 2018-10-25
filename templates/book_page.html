@@ -4,6 +4,12 @@
 
 
 
+
+{% block content %}{% endblock %}
+
+
+
+
 <form action="{{url_for('search')}}" method="post">
     <input type="text" name="search" placeholder="Search...">
     <button>Search</button>
@@ -24,12 +30,19 @@
             <!-- Other people's reviews from API and/or db (db to start with)-->
             <form action="{{url_for('rate')}}" id="review_form" method="post">
                 <input type="radio" name="usr_rating" value="1">
-                <input type="radio" name="usr_rating" value="2" checked>
-                <input type="radio" name="usr_rating" value="3">
+                <input type="radio" name="usr_rating" value="2">
+                <input type="radio" name="usr_rating" value="3" checked>
+                <input type="radio" name="usr_rating" value="4">
+                <input type="radio" name="usr_rating" value="5">
                 <br>
                 <textarea name="texty" form="review_form" style="resize: none;" rows="4" cols="50">{{review}}</textarea>
             <br>    
-            <input type="submit">
+            {% if already_reviewed == True %}
+                <input type="submit" disabled>
+                <input type="submit" value="Re-Submit">
+            {% else %}
+                <input type="submit">
+            {% endif %}
             <br> 
             <br> 
             
