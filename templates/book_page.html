@@ -1,63 +1,43 @@
-{% extends "template.html" %}
+{% extends "logged_in_template.html" %}
 
 {% block heading %}
-
-
-
-
-{% block content %}{% endblock %}
-
-
-
-
-<form action="{{url_for('search')}}" method="post">
-    <input type="text" name="search" placeholder="Search...">
-    <button>Search</button>
-</form>
+          
+<li>Title: {{row[2][2:-1]}}</li>
+<li>Author: {{row[3][2:-1]}}</li>
+<li>Published: {{row[4][2:-2]}}</li>
+<li>ISBN: {{row[1][2:-1]}}</li>
+<li>Your rating: {{rating}}<!-- your specific rating from just your db entry -->
+<li>Overall rating: {{avg_rating}}
 <br>
 
+<!-- Other people's reviews from API and/or db (db to start with)-->
+<form action="{{url_for('rate')}}" id="review_form" method="post">
+    <input type="radio" name="usr_rating" value="1">
+    <input type="radio" name="usr_rating" value="2">
+    <input type="radio" name="usr_rating" value="3" checked>
+    <input type="radio" name="usr_rating" value="4">
+    <input type="radio" name="usr_rating" value="5">
+    <br>
+    <textarea name="texty" form="review_form" style="resize: none;" rows="4" cols="50">{{review}}</textarea>
+<br>    
+{% if already_reviewed == True %}
+    <input type="submit" disabled>
+    <input type="submit" value="Re-Submit">
+{% else %}
+    <input type="submit">
+{% endif %}
+<br> 
+<br> 
 
-    
-          
-            <li>Title: {{row[2][2:-1]}}</li>
-            <li>Author: {{row[3][2:-1]}}</li>
-            <li>Published: {{row[4][2:-2]}}</li>
-            <li>ISBN: {{row[1][2:-1]}}</li>
-            <li>Your rating: {{rating}}<!-- your specific rating from just your db entry -->
-            <li>Overall rating: {{avg_rating}}
-            <br>
+{% for rev in reviews %}
+    {% if rev.review != "Not yet reviewed" %}
+    <br>
+    {{rev.first_name}} says...
+    <br>
+    <textarea disabled style="resize: none;" rows="4" cols="50">{{rev.review}}</textarea>
+    {% endif %}
+{% endfor %}
 
-            <!-- Other people's reviews from API and/or db (db to start with)-->
-            <form action="{{url_for('rate')}}" id="review_form" method="post">
-                <input type="radio" name="usr_rating" value="1">
-                <input type="radio" name="usr_rating" value="2">
-                <input type="radio" name="usr_rating" value="3" checked>
-                <input type="radio" name="usr_rating" value="4">
-                <input type="radio" name="usr_rating" value="5">
-                <br>
-                <textarea name="texty" form="review_form" style="resize: none;" rows="4" cols="50">{{review}}</textarea>
-            <br>    
-            {% if already_reviewed == True %}
-                <input type="submit" disabled>
-                <input type="submit" value="Re-Submit">
-            {% else %}
-                <input type="submit">
-            {% endif %}
-            <br> 
-            <br> 
-            
-            {% for rev in reviews %}
-                {% if rev.review != "Not yet reviewed" %}
-                <br>
-                {{rev.first_name}} says...
-                <br>
-                <textarea disabled style="resize: none;" rows="4" cols="50">{{rev.review}}</textarea>
-                {% endif %}
-            {% endfor %}
-
-
-
-<br><button><a href="{{ url_for('index') }}">Log Out</a></button>
 
 {% endblock %}
 

@@ -1,4 +1,4 @@
-{% extends "template.html" %}
+{% extends "logged_in_template.html" %}
 
 {% block heading %}
     Welcome back to Scrolled, {{name}}
@@ -15,15 +15,11 @@
     {% endfor %}
 <!-- Button for 'About You' -->
 {{test}}
-<form action="{{url_for('search')}}" method="post">
-    <input type="text" name="search" placeholder="Search...">
-    <button>Search</button>
-</form>
     {% for row in found %}
         <li>{{row.found}}</li>
     {% endfor %}
 <br><button><a href="{{ url_for('about') }}">About You</a></button>
-<br><button><a href="{{ url_for('index') }}">Log Out</a></button>
+
 
 {% endblock %}
 

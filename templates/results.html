@@ -1,14 +1,7 @@
-{% extends "template.html" %}
+{% extends "logged_in_template.html" %}
 
 {% block heading %}
 
-
-
-<form action="{{url_for('search')}}" method="post">
-    <input type="text" name="search" placeholder="Search...">
-    <button>Search</button>
-</form>
-<br>
     {% if rows|length < 1 %}
         No results found :(
     {% endif %}
@@ -31,7 +24,6 @@
    {% endfor %} -->
 
 
-<br><button><a href="{{ url_for('index') }}">Log Out</a></button>
 
 {% endblock %}
 

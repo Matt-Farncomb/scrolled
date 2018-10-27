@@ -217,11 +217,13 @@ def search():
 
 
 
-@app.route("/results", methods=["POST"])
+@app.route("/results", methods=["POST", "GET"])
 def get_book():
-
-	row = request.form.get('clicked')
-	row = row.split(",")
+	if request.method == "POST":
+		row = request.form.get('clicked')
+		row = row.split(",")
+	else:
+		row = session["clicked"]["row"]
 	book_id = row[0][1:]
 	rating = "Not yet rated"
 	review = "Not yet reviewed"
