@@ -1,5 +1,7 @@
 import os
 
+import requests
+
 from flask import Flask, session, render_template, request
 from flask_session import Session
 
@@ -225,10 +227,21 @@ def get_book():
 	else:
 		row = session["clicked"]["row"]
 	book_id = row[0][1:]
+	isbn = row[1][2:-1]
+
 	rating = "Not yet rated"
 	review = "Not yet reviewed"
 	already_reviewed = False
-	avg_ints = []
+	avg_ints = []	
+	gr_avg = "None found"
+	res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "sTyqqTgOkb6g67c1oDPmzA", "isbns": isbn})
+	if res.status_code != 404:
+		gr_avg = res.json()
+		gr_avg = gr_avg["books"][0]["average_rating"]
+	
+		
+	
+	
 
 	# reviews = db.execute('''SELECT * FROM reviews 
 	# 	WHERE book_id = :book_id''', 
@@ -255,18 +268,19 @@ def get_book():
 						   "review": review,
 						   "reviews": reviews,
 						   "book_id": book_id,
-						   "already_reviewed":True }
+						   "already_reviewed":True,
+						   "gr_avg":gr_avg }
 
 	if avg_rating[0] != None:
 		avg_rating = "{0:.2f}".format(avg_rating[0])
 	else:
 		avg_rating = "Not yet rated"
 
-
+	#maybe instead of all these different vars,have one dict parsed by jinja
 	return render_template("book_page.html", row=session["clicked"]["row"], 
 		rating=session["clicked"]["rating"], avg_rating=avg_rating,
 		review=session["clicked"]["review"], reviews=session["clicked"]["reviews"],
-		already_reviewed=already_reviewed)
+		already_reviewed=already_reviewed, gr_avg=gr_avg)
 
 
 
@@ -292,5 +306,6 @@ def rate():
 
 		return render_template("book_page.html", row=session["clicked"]["row"], 
 		rating=rating, avg_rating=avg_rating, reviews=reviews,
-		review=review, already_reviewed=session["clicked"]["already_reviewed"])
+		review=review, already_reviewed=session["clicked"]["already_reviewed"],
+		gr_avg=session["clicked"]["gr_avg"])
 			
