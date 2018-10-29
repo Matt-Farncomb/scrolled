@@ -323,7 +323,9 @@ def flight_api(isbn):
 								WHERE ISBN = :ISBN''', 
 								{"ISBN": isbn}).fetchone()
 			if rows == None:
-				return "Fag"
+				return jsonify ({
+					"error":"No results found for given ISBN: %s" % (isbn)
+					}), 422
 			else:
 				return jsonify ({
 					
@@ -331,6 +333,7 @@ def flight_api(isbn):
 					"Author":rows.author,
 					"ISBN":rows.isbn,
 					"year":rows.year,
-					"avg_rating":rows.avg_rating
+					"avg_rating":rows.avg_rating,
+					"review_count":rows.review_count
 					})
 
