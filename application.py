@@ -1,26 +1,23 @@
-import os
-
-import requests
-
-from flask import Flask, session, render_template, request, jsonify
-from flask_session import Session
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-
-from sqlalchemy import exc
-
 
 #TODO:
-# Redo all tables, restarting all data so they all begin at the same int (can just delete main ids)
-		#this will enable the request in home to work correctly
-# If testing success, do the API stuff
-# Quick Sass overview (lecture n stuff)
-# Quick Boostrap overview
-# USe Sass and Boostrap to style page
+	#FIRST
+		# Clean up code
+		# Refactor Code
+			# - index and LogOut are very similar. Maybe make then one fucntion?
+		# Clean up tables eg wipe tables and make sure they have correct types and good names
 
-##TODO: Have the home link in template.html be inherited by all pages 
+	#SECOND
+		# Quick Sass overview (lecture n stuff)
+		# Quick Boostrap overview
+		# USe Sass and Boostrap to style page
 
+import os
+import requests
+from flask import Flask, session, render_template, request, jsonify
+from flask_session import Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import exc
 
 
 
@@ -39,122 +36,117 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
-books = []
-
-#details=[]
 #Stores the variables from register.html
 request_list = ["password", "email", "first_name", "last_name", 
 				"dob", "country","author", "book",]
 
-#stores the form data from get_form_data
-# return_list = []
-
 fail = "LogIn failed. Password or Email not recognised."				
 
-#retrieves form data according to variables in request_list and stores them in return_list
+#
 def get_form_data(request_list):
+	'''retrieves form data according to variables in 
+	request_list and stores them in return_list'''
 	reg_success = True
 	return_list = []
 	reg_dict = {}
 	color_dict = {}
 	for e in request_list:
 		temp = request.form.get(e)
+		# if a value retrieved from the form is blank...
 		if temp == "":
+			# wipe the dict
 			reg_dict[e] = ""
+			# change color of that entry form to be red
 			color_dict[e] = 'background-color:#ffd0c4'
+			# registration has failed so change to false
 			if reg_success == True:
 				reg_success = False
 		else:
+			# if not blank append a key, value to return_list
 			reg_dict[e] = temp
 			return_list.append(temp)
+	# list will return false to show reg has failed
 	if reg_success == False:
 		return_list = False
+	# this session dict stores all values retrieved from form as key,value pairs in a dict
 	session["temp_reg"] = reg_dict
 	session["colors"] = color_dict
 	return return_list
 
 @app.route("/", methods=["GET"])
 def index():
-	
-	    #book = request.form.get("book")
-	    #books.append(book)
-
-	    ###Currently as a test grabs password off the entered email from the db
-	    ###Next will check to see if it exists
-	    	##If email exists, check password
-	    		##If password is correct, go to logged in page
-	    	##Else return error 
-
-	    # email = request.form.get("email")
-	    # password = request.form.get("password")
-	    # new_email = db.execute("SELECT password FROM user_logins WHERE email = :email",
-	    # 	{"email": email, "password": password}).fetchone()
-	    # books.append(new_email)
-
-	    
-	return render_template("index.html", books=books)
+	'''Login page'''
+	session.clear()
+	return render_template("index.html")
 
 @app.route("/#", methods=["POST"])
 def logout():
+	'''clear out session variables and return to login page'''
 	session.clear()
-	return render_template("index.html", books=books)
+	return render_template("index.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+	'''register user'''
 	msg = "Join the Scrolled clan"
+	# used to change display whether the user has registered successfully or not
 	registered = False
+	# used to determine where user is directed after a successful/unsuccessful login
 	url = 'index'
+	# text on page changed depending on successful registration attempt
 	msg_2 = "At Scrolled we are scrolled"
+	# will store details retrieved from html form
 	details = ""
+	# stores color used for html
 	colors = ""
 
 	if request.method == "POST":
 		return_list = get_form_data(request_list)
+		# if some of the values retrieved were blank...
 		if return_list == False:
 			msg_2 = "Please enter in all details requested"
 			details = session["temp_reg"]
 			colors = session["colors"]
+			# wipe the session dicts to be used again later
 			session["temp_reg"] = ""
-			session["colors"] = ""
+			session["colors"] = 'background-color:#ffd0c4'
 
 		else:
-			# username = request.form.get("username")
-			db.execute("INSERT INTO user_logins (password, email) VALUES (:password, :email)",
-								{"password":return_list[0], "email": return_list[1]})
-			db.execute('''INSERT INTO user_details (first_name, last_name, dob, country) 
-						  VALUES (:first_name, :last_name, :dob, :country)''',
-								{"first_name":return_list[2], "last_name": return_list[3],
-						 	    "dob": return_list[4],"country": return_list[5]})
-			# db.execute("INSERT INTO user_likes (author, book) VALUES (:author, :book)",
-			# 					{"author":return_list[6], "book": return_list[7]})
-			#if dob != None:
-			db.commit()
-			user_id = db.execute("SELECT user_id FROM user_logins WHERE email = :email",
-				{"email": return_list[1]}).fetchone()
-			
-			session["user_id"] = user_id.user_id
-
-			msg = "Registration Successful"
-			registered = True
-			url = 'home'
-				# retrieved_id = db.execute("SELECT user_id FROM user_logins WHERE email = :email",
-				# 	{"email": return_list[1]}).fetchone()
-				# db.execute('''INSERT INTO user_details (user_id) 
-				# 	VALUES (:user_id)'''), {"user_id":retrieved_id }
-				# db.commit()
-			# except exc.SQLAlchemyError:
-			# 	msg = "Email already registered... "
-			# 	registered = False
+			try:
+				# insert values retrieved from form into db
+				db.execute("INSERT INTO user_logins (password, email) VALUES (:password, :email)",
+									{"password":return_list[0], "email": return_list[1]})
+				db.execute('''INSERT INTO user_details (first_name, last_name, dob, country) 
+							  VALUES (:first_name, :last_name, :dob, :country)''',
+									{"first_name":return_list[2], "last_name": return_list[3],
+							 	    "dob": return_list[4],"country": return_list[5]})
+				db.commit()
+				#retrieve ID of user who has just registered...
+				user_id = db.execute("SELECT user_id FROM user_logins WHERE email = :email",
+					{"email": return_list[1]}).fetchone()
+				#... and log them in
+				session["user_id"] = user_id.user_id
+				#... assign str to be used in html to alert user
+				msg = "Registration Successful"
+				registered = True
+				url = 'home'
+			# if unique value of email already in db..
+			except exc.SQLAlchemyError:
+				#... display error text, color email form in red
+			 	msg = "Email already registered... "
+			 	colors = {'email': 'background-color:#ffd0c4'}
+			 	#...have html form display values previously entered
+			 	details = session["temp_reg"]
+			 	#... modify look of template via jina because registration unsuccessful
+			 	registered = False
+				
 	return render_template("register.html", msg=msg, msg_2=msg_2, registered=registered, url=url, details=details, color=colors)
 
 			
 
 @app.route("/home", methods=["GET"])
 def home():
-	# rows = db.execute("""SELECT book, author FROM user_likes JOIN user_logins
-	# 	ON user_logins.user_id = user_likes.user_id 
-	# 	WHERE user_likes.user_id = :user_id""", {"user_id": session["user_id"]}).fetchall()
-
+	'''Display logged in users favourite authors and books and welcome them by name'''
 	rows = db.execute("""SELECT book, author FROM user_likes  
 		WHERE user_id = :user_id""", {"user_id":session["user_id"]}).fetchall()
 
@@ -165,10 +157,12 @@ def home():
 
 @app.route("/about", methods=["GET"])
 def about():
+	'''render page for user to update favourite author and book'''
 	return render_template("about.html")
 	
 @app.route("/about", methods=["POST"])
 def update_about():
+	'''retrieve favourites from form to add to db'''
 	return_list = get_form_data(request_list)
 	db.execute("INSERT INTO user_likes (author, book, user_id) VALUES (:author, :book, :user_id)",
 							{"author":return_list[6], "book": return_list[7], "user_id":session["user_id"]})
@@ -178,41 +172,37 @@ def update_about():
 
 @app.route("/", methods=["POST"])
 def login():
+	'''
+	Compare email + password retrieved from form to db to determine if they match
+	If matching, session["user_id"] will be assigned the id retrieved from the db
+	so that the site will display info corresponding to the user
+	'''
 	email = request.form.get("email")
 	password = request.form.get("password")
+
 	##not sure what this logins thing is supposed to be for below... can't remeber why i did it...
-	logins = db.execute("SELECT * FROM user_logins WHERE email = :email and password = :password",
-	    {"email": email, "password": password}).fetchone()
-	##try and log into user, load name up on next page if successful, reload page with error if not
+	# logins = db.execute("SELECT * FROM user_logins WHERE email = :email and password = :password",
+	#     {"email": email, "password": password}).fetchone()
+
+	# try and log into user, load name up on next page if successful, reload page with error if not
 	try:
 		usr_name = db.execute("""SELECT * FROM user_details JOIN user_logins
 				ON user_logins.user_id = user_details.details_id
 				WHERE email = :email """, {"email":email}).fetchone() 
 		session["user_id"] = usr_name.user_id
 		return home()
-		#return render_template("home.html", name=usr_name.first_name)	
 	except:
 		return render_template("index.html", fail=fail)
 
 @app.route("/home", methods=["GET", "POST"])
 def search():
-	avg_rating = 0
-	counter = 0
+	'''Search through db for anything similar to user input in form'''
 	try:
 		entry = request.form.get("search")
 		entry = "%" + entry + "%"
 		rows = db.execute("SELECT * FROM books WHERE book_name LIKE :search or author LIKE :search or ISBN LIKE :search",
 			{"search":entry}).fetchall()
 
-		book_id = rows[0]["book_id"]
-		#reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id  and reviewer_id = :reviewer_id", {"book_id":book_id, "reviewer_id":session["user_id"]}).fetchall()
-		# for e in reviews:
-		# 	avg_rating += int(reviews[0]["rating"])
-		# 	counter += 1
-		# if avg_rating > 0:
-		# 	avg_rating = avg_rating / counter
-		# else:
-		# 	avg_rating == "Not rated"
 	except Exception:
 		rows=[]
 	return render_template("results.html", rows=rows)

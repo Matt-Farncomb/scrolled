@@ -1,4 +1,4 @@
-{% extends "logged_in_template.html" %}
+{% extends "template.html" %}
 
 {% block heading %}
     {{msg}}
@@ -25,37 +25,12 @@
        <input type="text" name="country" placeholder="Country..." style="{{color.country}}" value={{details.country}}> 
       <br>
       <br> 
-      <button>Register</button>
-      <br><br>   
+      <button>Register</button>  
     </form>
 
-     <!-- <form action="{{ url_for('register') }}" method="post">
-        <input type="text" name="email" placeholder="{{details.email}}">
-        <br>
-        <input type="text" name="password" placeholder="{{details.password}}">
-        <br>
-        <input type="text" name="first_name" placeholder="{{details.first_name}}">
-        <br>
-        <input type="text" name="last_name" placeholder="{{details.last_name}}">
-        <br>
-        <input type="text" name="dob" placeholder="{{details.dob}}">
-        <br>
-         <input type="text" name="country" placeholder="{{details.country}}">
-        <br>
-        <br> 
-        <button>Register</button>
-        <br><br>   
-         </form> -->
-            
-    {% endif %}
+     {% endif %}
 
-    <!-- <ul>
-        {% for detail in details %}
-            <li><h2>{{ detail }}</h2></li>
-        {% endfor %}
-    </ul> -->
+    <button><a href="{{ url_for('index') }}">LogIn</a></button>
 
 
-
- 
 {% endblock %}
