@@ -2,7 +2,7 @@ import os
 
 import requests
 
-from flask import Flask, session, render_template, request
+from flask import Flask, session, render_template, request, jsonify
 from flask_session import Session
 
 from sqlalchemy import create_engine
@@ -299,6 +299,13 @@ def rate():
 		db.commit()
 		avg_rating = db.execute("SELECT AVG(rating) FROM reviews WHERE book_id = :book_id", {"book_id":book_id}).fetchone()
 		avg_rating = "{0:.2f}".format(avg_rating[0])
+		db.execute("UPDATE books  SET avg_rating = :avg_rating WHERE book_id = :book_id", {"avg_rating":avg_rating,"book_id":book_id})
+		r_count = db.execute(''' SELECT books.isbn, COUNT(*) FROM reviews 
+			JOIN books ON reviews.book_id = books.book_id 
+			GROUP BY isbn''').fetchone()
+		db.execute("UPDATE books SET review_count = :r_count WHERE book_id = :book_id", {"r_count":r_count.count,"book_id":book_id})
+			
+		db.commit()
 
 		reviews = db.execute("""SELECT * FROM user_details JOIN reviews
 				ON reviews.reviewer_id = user_details.details_id
@@ -308,4 +315,22 @@ def rate():
 		rating=rating, avg_rating=avg_rating, reviews=reviews,
 		review=review, already_reviewed=session["clicked"]["already_reviewed"],
 		gr_avg=session["clicked"]["gr_avg"])
+
+@app.route("/api/<string:isbn>", methods=["GET"])
+def flight_api(isbn):
 			
+			rows = db.execute('''SELECT * FROM books
+								WHERE ISBN = :ISBN''', 
+								{"ISBN": isbn}).fetchone()
+			if rows == None:
+				return "Fag"
+			else:
+				return jsonify ({
+					
+					"title":rows.book_name,
+					"Author":rows.author,
+					"ISBN":rows.isbn,
+					"year":rows.year,
+					"avg_rating":rows.avg_rating
+					})
+
