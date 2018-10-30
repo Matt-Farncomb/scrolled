@@ -2,13 +2,13 @@
 
 {% block heading %}
           
-<li>Title: {{row[2][2:-1]}}</li>
-<li>Author: {{row[3][2:-1]}}</li>
-<li>Published: {{row[4][2:-1]}}</li>
-<li>ISBN: {{row[1][2:-1]}}</li>
-<li>Your rating: {{rating}}<!-- your specific rating from just your db entry -->
-<li>Scrolled rating: {{avg_rating}}
-<li>Good Reads avg: {{gr_avg}}</li>
+<li>Title: {{book_info.row[2][2:-1]}}</li>
+<li>Author: {{book_info.row[3][2:-1]}}</li>
+<li>Published: {{book_info.row[4][2:-1]}}</li>
+<li>ISBN: {{book_info.row[1][2:-1]}}</li>
+<li>Your rating: {{book_info.rating}}<!-- your specific rating from just your db entry -->
+<li>Scrolled rating: {{book_info.avg_rating}}
+<li>Good Reads avg: {{book_info.gr_avg}}</li>
 <br>
 
 <!-- Other people's reviews from API and/or db (db to start with)-->
@@ -19,9 +19,9 @@
     <input type="radio" name="usr_rating" value="4">
     <input type="radio" name="usr_rating" value="5">
     <br>
-    <textarea name="texty" form="review_form" style="resize: none;" rows="4" cols="50">{{review}}</textarea>
+    <textarea name="texty" form="review_form" style="resize: none;" rows="4" cols="50">{{book_info.review}}</textarea>
 <br>    
-{% if already_reviewed == True %}
+{% if book_info.already_reviewed == True %}
     <input type="submit" disabled>
     <input type="submit" value="Re-Submit">
 {% else %}
@@ -30,7 +30,7 @@
 <br> 
 <br> 
 
-{% for rev in reviews %}
+{% for rev in book_info.reviews %}
     {% if rev.review != "Not yet reviewed" %}
     <br>
     {{rev.first_name}} says...
