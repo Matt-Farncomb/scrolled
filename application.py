@@ -261,7 +261,7 @@ def get_book():
 		gr_avg = res.json()
 		gr_avg = gr_avg["books"][0]["average_rating"]
 
-
+	# return an object with the users reviews, ratings and their names
 	reviews = db.execute("""SELECT * FROM user_details JOIN reviews
 				ON reviews.reviewer_id = user_details.user_id
 				WHERE book_id = :book_id """, {"book_id":book_id}).fetchall()
